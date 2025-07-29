@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Process & Logs</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+      margin: 0; 
+      padding: 20px; 
+      min-height: 100vh;
+    }
+    .container { 
+      max-width: 800px; 
+      margin: 0 auto; 
+      background: #fff; 
+      border-radius: 16px; 
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+      padding: 40px; 
+      position: relative;
+      overflow: hidden;
+    }
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+    h1 { 
+      text-align: center; 
+      color: #2c3e50; 
+      margin-bottom: 30px;
+      font-size: 2.5em;
+      font-weight: 300;
+    }
+    .form-section {
+      background: #f8f9fa;
+      padding: 25px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      border: 1px solid #e9ecef;
+    }
+    form { display: flex; gap: 12px; }
+    input[type="text"] { 
+      flex: 1; 
+      padding: 14px 16px; 
+      border: 2px solid #e1e5e9; 
+      border-radius: 8px; 
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    button { 
+      padding: 14px 28px; 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+      color: #fff; 
+      border: none; 
+      border-radius: 8px; 
+      font-weight: 600; 
+      cursor: pointer;
+      font-size: 16px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    button:disabled { 
+      background: #a0cfff; 
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    /* Enhanced Progress Section */
+    .progress-section {
+      background: #fff;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 25px;
+      border: 1px solid #e9ecef;
+    }
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .progress-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    .progress-percentage {
+      font-size: 16px;
+      font-weight: 600;
+      color: #667eea;
+    }
+    
+    /* Progress Bar */
+    .progress-bar-container {
+      width: 100%;
+      height: 8px;
+      background: #e9ecef;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 25px;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      width: 0%;
+      transition: width 0.5s ease;
+      border-radius: 4px;
+    }
+    
+    /* Enhanced Steps */
+    .steps { 
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin-bottom: 25px;
+    }
+    .step { 
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 12px;
+      border-radius: 12px;
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .step-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #e9ecef;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+    .step.processing { 
+      background: #fff3cd; 
+      border-color: #ffc107; 
+      color: #856404;
+      transform: scale(1.05);
+    }
+    .step.processing .step-icon {
+      background: #ffc107;
+      color: white;
+      animation: pulse 1.5s infinite;
+    }
+    .step.done { 
+      background: #d1edff; 
+      border-color: #0066cc; 
+      color: #004085;
+    }
+    .step.done .step-icon {
+      background: #28a745;
+      color: white;
+    }
+    .step.error { 
+      background: #f8d7da; 
+      border-color: #dc3545; 
+      color: #721c24;
+    }
+    .step.error .step-icon {
+      background: #dc3545;
+      color: white;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    
+    /* Enhanced Logs */
+    .logs-section {
+      background: #fff;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 25px;
+      border: 1px solid #e9ecef;
+    }
+    .logs-header {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logs { 
+      background: #1a1a1a; 
+      color: #00ff88; 
+      padding: 20px; 
+      min-height: 150px; 
+      border-radius: 8px; 
+      font-family: 'Consolas', 'Monaco', monospace; 
+      font-size: 14px; 
+      line-height: 1.5;
+      white-space: pre-line; 
+      overflow-y: auto; 
+      max-height: 300px;
+      border: 1px solid #333;
+    }
+    
+    /* Enhanced Results */
+    .result { 
+      background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); 
+      border: 2px solid #28a745; 
+      border-radius: 12px; 
+      padding: 25px; 
+      margin-top: 25px; 
+      display: none;
+    }
+    .result h3 {
+      color: #155724;
+      margin-top: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+    .result-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #c3e6cb;
+    }
+    
+    /* Loading Animation */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Platform Badge */
+    .platform-badge {
+      display: inline-block;
+      background: #667eea;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+    
+    /* Enhanced Result Sections */
+    .result-section {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid #e9ecef;
+    }
+    .result-section h4 {
+      margin: 0 0 15px 0;
+      color: #2c3e50;
+      font-size: 18px;
+      font-weight: 600;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 8px;
+    }
+    .result-section h5 {
+      margin: 15px 0 10px 0;
+      color: #495057;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
+    /* Info Grid */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+    }
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .info-item label {
+      font-weight: 600;
+      color: #495057;
+      font-size: 14px;
+    }
+    .info-item a, .info-item span {
+      color: #667eea;
+      text-decoration: none;
+      font-size: 14px;
+      word-break: break-all;
+    }
+    .info-item a:hover {
+      text-decoration: underline;
+    }
+    
+    /* Transcription Box */
+    .transcription-box {
+      background: #fff;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      padding: 15px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #495057;
+    }
+    
+    /* Analysis Items */
+    .analysis-item {
+      margin-bottom: 25px;
+    }
+    .hooks-list, .ctas-list, .usps-list {
+      display: grid;
+      gap: 10px;
+    }
+    .hook-item, .cta-item, .usp-item {
+      background: #fff;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      padding: 12px 15px;
+      border-left: 4px solid #667eea;
+      transition: transform 0.2s ease;
+    }
+    .hook-item:hover, .cta-item:hover, .usp-item:hover {
+      transform: translateX(5px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    /* Collapsible JSON */
+    .collapsible-header {
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .collapsible-header:hover {
+      color: #667eea;
+    }
+    .raw-json {
+      margin-top: 15px;
+    }
+    .raw-json pre {
+      background: #1a1a1a;
+      color: #00ff88;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="loading-spinner"></div>
+  </div>
+  
+  <div class="container">
+    <h1>🎬 AI Video Analyzer</h1>
+    
+    <div class="form-section">
+      <form id="video-form">
+        <input type="text" id="url-input" placeholder="Enter video URL from any platform (YouTube, Instagram, TikTok, etc.)" required />
+        <button type="submit" id="analyze-btn">🚀 Analyze Video</button>
+      </form>
+    </div>
+    
+    <div class="progress-section" id="progress-section" style="display: none;">
+      <div class="progress-header">
+        <div class="progress-title">Processing Video<span class="platform-badge" id="platform-badge"></span></div>
+        <div class="progress-percentage" id="progress-percentage">0%</div>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+      
+      <div class="steps" id="steps">
+        <div class="step" id="step-download">
+          <div class="step-icon">📥</div>
+          <div>Download</div>
+        </div>
+        <div class="step" id="step-upload">
+          <div class="step-icon">☁️</div>
+          <div>Upload</div>
+        </div>
+        <div class="step" id="step-extraction">
+          <div class="step-icon">🎵</div>
+          <div>Extract Audio</div>
+        </div>
+        <div class="step" id="step-transcription">
+          <div class="step-icon">📝</div>
+          <div>Transcription</div>
+        </div>
+        <div class="step" id="step-analysis">
+          <div class="step-icon">🧠</div>
+          <div>AI Analysis</div>
+        </div>
+        <div class="step" id="step-complete">
+          <div class="step-icon">✅</div>
+          <div>Complete</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="logs-section">
+      <div class="logs-header">
+        <span>📊 Real-time Logs</span>
+      </div>
+      <div class="logs" id="debug-logs">🎯 Ready to analyze videos from any platform...
+
+💡 Supported platforms:
+• YouTube (including Shorts)
+• Instagram (Posts, Reels, IGTV)
+• TikTok
+• Twitter/X
+• Facebook
+• LinkedIn
+• And many more!
+
+Enter a video URL above to get started.</div>
+    </div>
+    
+    <div class="result" id="result-section">
+      <h3>🎉 Analysis Complete!</h3>
+      
+      <!-- Video Information -->
+      <div class="result-section">
+        <h4>📹 Video Information</h4>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Original URL:</label>
+            <a id="original-url" href="#" target="_blank">-</a>
+          </div>
+          <div class="info-item">
+            <label>Supabase Video URL:</label>
+            <a id="supabase-url" href="#" target="_blank">-</a>
+          </div>
+          <div class="info-item">
+            <label>Processing Time:</label>
+            <span id="processing-time">-</span>
+          </div>
+          <div class="info-item">
+            <label>Platform:</label>
+            <span id="platform-detected">-</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Transcription -->
+      <div class="result-section">
+        <h4>📝 Transcription</h4>
+        <div class="transcription-box" id="transcription-content">
+          Loading transcription...
+        </div>
+      </div>
+      
+      <!-- AI Analysis Results -->
+      <div class="result-section">
+        <h4>🧠 AI Analysis</h4>
+        
+        <!-- Hooks -->
+        <div class="analysis-item">
+          <h5>🎣 Hooks</h5>
+          <div class="hooks-list" id="hooks-list">
+            Loading hooks...
+          </div>
+        </div>
+        
+        <!-- CTAs -->
+        <div class="analysis-item">
+          <h5>📢 Call to Actions (CTAs)</h5>
+          <div class="ctas-list" id="ctas-list">
+            Loading CTAs...
+          </div>
+        </div>
+        
+        <!-- USPs -->
+        <div class="analysis-item">
+          <h5>⭐ Unique Selling Points (USPs)</h5>
+          <div class="usps-list" id="usps-list">
+            Loading USPs...
+          </div>
+        </div>
+      </div>
+      
+      <!-- Raw JSON (Collapsible) -->
+      <div class="result-section">
+        <h4 class="collapsible-header" onclick="toggleRawJson()">🔧 Raw JSON Data <span id="json-toggle">▼</span></h4>
+        <div class="raw-json" id="raw-json" style="display: none;">
+          <pre id="result-json"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Content Analyzer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>🎥 Video Content Analyzer</h1>
+    <form id="analyze-form">
+      <label for="video-url">Paste Social Media Video URL:</label>
+      <input type="url" id="video-url" name="video-url" placeholder="e.g. https://www.youtube.com/watch?v=..." required>
+      <button type="submit">Analyze Video</button>
+    </form>
+    <div id="steps-progress">
+      <h2>Step Progress</h2>
+      <div class="steps-circles">
+        <div class="step-circle" id="step-download">Download</div>
+        <div class="step-circle" id="step-upload">Upload</div>
+        <div class="step-circle" id="step-extraction">Extract</div>
+        <div class="step-circle" id="step-transcription">Transcribe</div>
+        <div class="step-circle" id="step-analysis">Analyze</div>
+        <div class="step-circle" id="step-complete">Complete</div>
+      </div>
+    </div>
+    <div id="progress-section">
+      <h2>Process Debug Logs</h2>
+      <pre id="debug-logs"></pre>
+    </div>
+    <div id="result-section" style="display:none;">
+      <h2>Analysis Result</h2>
+      <div id="result-json"></div>
+    </div>
+  </div>
+  <script src="main.js"></script>
+</body>
+</html>
